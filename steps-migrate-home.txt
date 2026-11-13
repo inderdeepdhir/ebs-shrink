@@ -1,0 +1,18 @@
+1. create new volume for "home" - same DC, copy tags, new size - then attach new volume via UI/CLI to instance as `/dev/sdf`
+2. init the new volume, `sudo lsblk -f`, `sudo mkfs -t xfs /dev/sdf`, verify by `sudo lsblk -f`
+3. create mount path `sudo mkdir -p /ebs/home`, `echo | sudo tee /ebs/home/NOT_MOUNTED.txt`, `ls -al /ebs/home`, 
+4. create target folder, change owner, `sudo mkdir -p /ebs/home/ec2-user`, `sudo chown ec2-user:ec2-user /ebs/home/ec2-use`
+5. mount new volume and recreate target folder, change owner, `sudo mount /dev/sdf /ebs/home`, `ls -al /ebs/home`, `sudo mkdir -p /ebs/home/ec2-user`, `sudo chown ec2-user:ec2-user /ebs/home/ec2-user`
+5. check for files/folders not owned by ec2-user, `sudo find /home/ec2-user -not -user ec2-user -ls`
+6. install rysnc, then run rsync, `sudo dnf install rsync -y`, `rsync -avz ~/ /ebs/home/ec2-user --dry-run`
+7. rename existing, `sudo mv /home/ec2-user /home/ec2-user-old` # delete later
+8. create softlink, `sudo ln -s /ebs/home/ec2-user /home/ec2-user`
+9. update /etc/fstab to automatically mount volume on reboot
+
+
+
+
+UUID=41a0866e-b828-4ad4-8ab0-9c3180c0e617     /ebs/home           xfs    defaults,nofail,noatime  1   1
+
+UUID=9bdfac70-7555-48e1-bfa5-5335aba9b49c     /disk           xfs    defaults,nofail,noatime  1   1
+
